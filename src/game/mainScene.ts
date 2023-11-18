@@ -1,24 +1,28 @@
 import Phaser from "phaser";
-import type { CursorKeys, GameObjectWithBody, Keyboard, Physics, PhysicsGroup, TileSprite } from "../common/game.type";
+import type { CursorKeys, GameObjectWithBody, Keyboard, Physics, PhysicsGroup, Text, TileSprite } from "../common/game.type";
 
 export default class MainScene extends Phaser.Scene {
 
   private player!: Physics;
   private playerHp!: number;
-  private cursors?: CursorKeys;
-  private background!: TileSprite;
   private bullet!: Physics;
+  private bulletNum!: number;
+
   private enemyBullet!: Physics;
   private enemyBulletGroup!: PhysicsGroup;
-  private spacebar!: Keyboard;
-  private bulletNum!: number;
-  private bat!: Physics;
-  private batNum!: number;
   private enemyBulletNum!: number;
-  private batGroup!: PhysicsGroup;
-  private defeatedBats!: number;
   private ghost!: Physics;
   private ghostHp!: number;
+
+  private bat!: Physics;
+  private batNum!: number;
+  private batGroup!: PhysicsGroup;
+  private defeatedBats!: number;
+
+  private stockText!: Text;
+  private background!: TileSprite;
+  private cursors?: CursorKeys;
+  private spacebar!: Keyboard;
   private interValId!: number;
   private isGameOver!: boolean;
 
@@ -35,7 +39,7 @@ export default class MainScene extends Phaser.Scene {
     this.batGroup = this.physics.add.group();
     this.enemyBulletGroup = this.physics.add.group();
     this.ghostHp = 20;
-    this.playerHp = 10;
+    this.playerHp = 5;
     this.isGameOver = false;
   }
 
@@ -60,6 +64,9 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     this.background = this.add.tileSprite(400, 300, 800, 600, 'background');
+
+    this.add.image(16, 20, 'player');
+    this.stockText = this.add.text(30, 16, `×${this.playerHp}`, { fontSize: '18px'});
 
     this.createPlayer();
 
@@ -248,6 +255,11 @@ export default class MainScene extends Phaser.Scene {
     ghost: GameObjectWithBody | Phaser.Tilemaps.Tile,
   ) {
     (bullet as GameObjectWithBody).destroy();
+    this.ghost.setTint(0xff0000);
+    setTimeout(() => {
+      this.ghost.clearTint();
+    }, 100);
+    
     this.ghostHp -= 1;
     if(this.ghostHp === 0) {
       (ghost as GameObjectWithBody).destroy();
@@ -260,7 +272,13 @@ export default class MainScene extends Phaser.Scene {
     enemy: GameObjectWithBody | Phaser.Tilemaps.Tile,
   ) {
     (enemy as GameObjectWithBody).destroy();
+    this.player.setTint(0xff0000);
+    setTimeout(() => {
+      this.player.clearTint();
+    }, 100);
+
     this.playerHp -= 1;
+    this.stockText.setText(`×${this.playerHp}`);
     if(this.playerHp === 0) {
       this.isGameOver = true;
       clearInterval(this.interValId);
